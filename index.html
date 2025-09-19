@@ -3,1299 +3,585 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment & Sales Management Portal</title>
-    <!-- Tailwind CSS -->
+    <title>Financial Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for Excel handling -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #4cc9f0;
-            --danger: #f72585;
-            --warning: #f8961e;
-            --info: #4895ef;
-            --light: #f8f9fa;
-            --dark: #212529;
-        }
-        
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
+            background-color: #f0f4f8;
         }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
         }
-        
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 50;
-                height: 100vh;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 40;
-            }
-            .overlay.open {
-                display: block;
-            }
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-        
-        .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary:hover {
-            background: var(--secondary);
-            transform: translateY(-2px);
-            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
-        }
-        
-        .summary-card {
-            border-left: 4px solid var(--primary);
-            transition: all 0.3s ease;
-        }
-        
-        .summary-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
-        }
-        
-        .nav-item {
-            transition: all 0.3s ease;
-            border-radius: 8px;
-        }
-        
-        .nav-item:hover {
-            background: rgba(67, 97, 238, 0.1);
-        }
-        
-        .nav-item.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            ring: 2px solid var(--primary);
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        th {
-            background-color: #f8fafc;
-            font-weight: 600;
-            color: #64748b;
-        }
-        
-        tr:hover {
-            background-color: #f1f5f9;
-        }
-        
         .modal {
             display: none;
             position: fixed;
-            z-index: 100;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
-        
         .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 20px;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 24px;
             border-radius: 12px;
-            width: 80%;
-            max-width: 700px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: black;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-8 px-4">
-    <div class="container mx-auto max-w-7xl">
-        <!-- Login Screen (initially shown) -->
-        <div id="loginScreen" class="login-container p-8 max-w-md mx-auto fade-in">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                    <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-800">Sales Portal</h1>
-                <p class="text-gray-600 mt-2">Sign in to your account</p>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="container bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">Financial Manager</h1>
+        <p class="text-center text-gray-500 mb-6 sm:mb-8">Track your income and outstanding amounts with ease.</p>
+
+        <!-- User ID Display -->
+        <div id="auth-status" class="flex flex-col sm:flex-row items-center justify-between bg-gray-50 p-4 rounded-lg shadow-inner mb-6">
+            <div class="text-sm text-gray-700 mb-2 sm:mb-0">
+                <span class="font-semibold">User ID:</span>
+                <span id="userIdDisplay" class="font-mono text-xs break-all">Connecting...</span>
             </div>
-            
-            <form id="loginForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-medium mb-2" for="username">
-                        User ID
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
-                        </div>
-                        <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               id="username" type="text" placeholder="Enter your user ID">
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-medium mb-2" for="password">
-                        Password
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-lock text-gray-400"></i>
-                        </div>
-                        <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               id="password" type="password" placeholder="Enter your password">
-                    </div>
-                </div>
-                
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <input id="rememberMe" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
-                            Remember me
+            <div id="loading" class="text-sm font-medium text-blue-600 animate-pulse">Loading...</div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:mb-8 text-center">
+            <div class="bg-green-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-green-700 font-medium">Total Salary</p>
+                <p id="totalSalary" class="text-2xl font-bold text-green-800 mt-1">₹ 0.00</p>
+            </div>
+            <div class="bg-red-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-red-700 font-medium">Total Pending</p>
+                <p id="totalPending" class="text-2xl font-bold text-red-800 mt-1">₹ 0.00</p>
+            </div>
+            <div class="bg-yellow-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-yellow-700 font-medium">Total Savings</p>
+                <p id="totalSavings" class="text-2xl font-bold text-yellow-800 mt-1">₹ 0.00</p>
+            </div>
+            <div class="bg-indigo-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-indigo-700 font-medium">Total Investment</p>
+                <p id="totalInvestment" class="text-2xl font-bold text-indigo-800 mt-1">₹ 0.00</p>
+            </div>
+            <div class="bg-gray-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-gray-700 font-medium">Total Expense</p>
+                <p id="totalExpense" class="text-2xl font-bold text-gray-800 mt-1">₹ 0.00</p>
+            </div>
+            <div class="bg-blue-100 rounded-lg p-4 shadow-sm">
+                <p class="text-sm text-blue-700 font-medium">Balance</p>
+                <p id="balance" class="text-2xl font-bold text-blue-800 mt-1">₹ 0.00</p>
+            </div>
+        </div>
+
+        <!-- Input Form -->
+        <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 sm:mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Add New Entry</h2>
+            <form id="entryForm" class="space-y-4">
+                <div>
+                    <label for="entryType" class="block text-gray-700 font-medium mb-1">Entry Type</label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="entryType" value="Salary" class="form-radio text-green-600 rounded-full" checked>
+                            <span class="ml-2 text-gray-700">Salary</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="entryType" value="Pending" class="form-radio text-red-600 rounded-full">
+                            <span class="ml-2 text-gray-700">Pending</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="entryType" value="Savings" class="form-radio text-yellow-600 rounded-full">
+                            <span class="ml-2 text-gray-700">Savings</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="entryType" value="Investment" class="form-radio text-indigo-600 rounded-full">
+                            <span class="ml-2 text-gray-700">Investment</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="entryType" value="Expense" class="form-radio text-gray-600 rounded-full">
+                            <span class="ml-2 text-gray-700">Expense</span>
                         </label>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn-primary w-full py-3 font-semibold rounded-lg shadow-md">
-                    Sign In
+                <div>
+                    <label for="amount" class="block text-gray-700 font-medium mb-1">Amount</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">₹</span>
+                        </div>
+                        <input type="number" id="amount" name="amount" class="block w-full pl-8 pr-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
+                    </div>
+                </div>
+                <div id="percentageInputDiv" class="hidden">
+                    <label for="percentage" class="block text-gray-700 font-medium mb-1">Percentage (%)</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <input type="number" id="percentage" name="percentage" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="description" class="block text-gray-700 font-medium mb-1">Description</label>
+                    <input type="text" id="description" name="description" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
+                </div>
+                <div>
+                    <label for="date" class="block text-gray-700 font-medium mb-1">Date</label>
+                    <input type="date" id="date" name="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+                    Add Entry
+                </button>
+                <button type="button" id="cancelEditBtn" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md hidden">
+                    Cancel Edit
                 </button>
             </form>
-            
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">Default credentials: User ID: <span class="font-medium">admin</span>, Password: <span class="font-medium">admin</span></p>
+        </div>
+
+        <!-- Confirmation Section (for add) -->
+        <div id="confirmationSection" class="bg-yellow-100 p-6 rounded-xl shadow-inner mb-6 sm:mb-8 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirm Entry</h2>
+            <div id="confirmationDetails" class="text-gray-700 space-y-2 mb-4"></div>
+            <div class="flex gap-4">
+                <button id="confirmBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+                    Confirm and Save
+                </button>
+                <button id="cancelBtn" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
+                    Cancel
+                </button>
             </div>
         </div>
-        
-        <!-- Main App (initially hidden) -->
-        <div id="appContainer" class="hidden">
-            <div class="flex flex-col md:flex-row gap-6">
-                <!-- Sidebar -->
-                <div class="sidebar glass-effect w-full md:w-64 py-6 px-4">
-                    <div class="flex items-center justify-center mb-8">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center mr-3">
-                            <i class="fas fa-chart-pie text-white"></i>
-                        </div>
-                        <span class="text-xl font-bold text-blue-800">SalesPortal</span>
-                    </div>
-                    
-                    <nav class="space-y-2">
-                        <a href="#" data-page="dashboard" class="nav-item active flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-tachometer-alt mr-3"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="#" data-page="dataEntry" class="nav-item flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-plus-circle mr-3"></i>
-                            <span>Data Entry</span>
-                        </a>
-                        <a href="#" data-page="records" class="nav-item flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-database mr-3"></i>
-                            <span>Records</span>
-                        </a>
-                        <a href="#" data-page="importExport" class="nav-item flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-file-import mr-3"></i>
-                            <span>Import/Export</span>
-                        </a>
-                        <a href="#" data-page="settings" class="nav-item flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-cog mr-3"></i>
-                            <span>Settings</span>
-                        </a>
-                        <a href="#" id="logoutBtn" class="nav-item flex items-center py-3 px-4 text-gray-700 hover:text-blue-600">
-                            <i class="fas fa-sign-out-alt mr-3"></i>
-                            <span>Logout</span>
-                        </a>
-                    </nav>
-                    
-                    <div class="mt-16 px-4">
-                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                            <h3 class="font-medium text-blue-800">Need help?</h3>
-                            <p class="text-sm text-blue-600 mt-1">Contact our support team</p>
-                            <p class="text-xs text-blue-500 mt-2">support@salesportal.com</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Main Content -->
-                <div class="flex-1">
-                    <!-- Header -->
-                    <div class="glass-effect p-6 mb-6 flex justify-between items-center">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h1>
-                            <p class="text-gray-600" id="pageSubtitle">Welcome back, Admin! Here's your analytics report.</p>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="mr-4 relative">
-                                <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full"></div>
-                                <i class="fas fa-bell text-gray-600 text-xl"></i>
-                            </div>
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                <i class="fas fa-user text-blue-600"></i>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pages -->
-                    <div id="pagesContainer">
-                        <!-- Dashboard Page -->
-                        <div id="dashboard" class="page active">
-                            <!-- Summary Cards -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                <div class="summary-card glass-effect p-6">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <h3 class="text-gray-600">Gross Sales</h3>
-                                            <p class="text-2xl font-bold mt-1">$42,845</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <i class="fas fa-dollar-sign text-blue-600"></i>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-green-600 mt-2"><i class="fas fa-arrow-up"></i> 12.5% from last month</p>
-                                </div>
-                                
-                                <div class="summary-card glass-effect p-6">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <h3 class="text-gray-600">Net Due</h3>
-                                            <p class="text-2xl font-bold mt-1">$28,452</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                                            <i class="fas fa-hand-holding-usd text-green-600"></i>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-green-600 mt-2"><i class="fas fa-arrow-up"></i> 8.3% from last month</p>
-                                </div>
-                                
-                                <div class="summary-card glass-effect p-6">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <h3 class="text-gray-600">Chargebacks</h3>
-                                            <p class="text-2xl font-bold mt-1">$1,254</p>
-                                        </div>
-                                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                            <i class="fas fa-exchange-alt text-red-600"></i>
-                                        </div>
-                                    </div>
-                                    <p class="text-sm text-red-600 mt-2"><i class="fas fa-arrow-down"></i> 3.2% from last month</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Charts Section -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                                <div class="glass-effect p-6">
-                                    <h3 class="font-bold text-gray-800 mb-4">Sales by Month</h3>
-                                    <div class="chart-container">
-                                        <canvas id="salesChart"></canvas>
-                                    </div>
-                                </div>
-                                
-                                <div class="glass-effect p-6">
-                                    <h3 class="font-bold text-gray-800 mb-4">Revenue Distribution</h3>
-                                    <div class="chart-container">
-                                        <canvas id="revenueChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Recent Transactions -->
-                            <div class="glass-effect p-6 mb-8">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="font-bold text-gray-800">Recent Transactions</h3>
-                                    <button class="text-blue-600 text-sm font-medium">View All</button>
-                                </div>
-                                
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead>
-                                            <tr class="text-left text-gray-600 text-sm">
-                                                <th class="pb-3">Unit</th>
-                                                <th class="pb-3">Month</th>
-                                                <th class="pb-3">Gross Sales</th>
-                                                <th class="pb-3">Net Due</th>
-                                                <th class="pb-3">Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-100">
-                                            <tr>
-                                                <td class="py-3">Noida</td>
-                                                <td class="py-3">June 2023</td>
-                                                <td class="py-3">$12,458</td>
-                                                <td class="py-3">$8,452</td>
-                                                <td class="py-3"><span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="py-3">Gurugram</td>
-                                                <td class="py-3">June 2023</td>
-                                                <td class="py-3">$8,652</td>
-                                                <td class="py-3">$5,841</td>
-                                                <td class="py-3"><span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="py-3">Delhi</td>
-                                                <td class="py-3">June 2023</td>
-                                                <td class="py-3">$10,457</td>
-                                                <td class="py-3">$7,254</td>
-                                                <td class="py-3"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td class="py-3">Noida</td>
-                                                <td class="py-3">May 2023</td>
-                                                <td class="py-3">$11,352</td>
-                                                <td class="py-3">$7,854</td>
-                                                <td class="py-3"><span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Completed</span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Data Entry Page -->
-                        <div id="dataEntry" class="page">
-                            <div class="glass-effect p-6 mb-6">
-                                <h2 class="text-xl font-bold text-gray-800 mb-4">Add New Sales Record</h2>
-                                
-                                <form id="dataEntryForm">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="unitName">
-                                                Unit Name
-                                            </label>
-                                            <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                    id="unitName" required>
-                                                <option value="">Select Unit</option>
-                                                <option value="Noida">Noida</option>
-                                                <option value="Gurugram">Gurugram</option>
-                                                <option value="Delhi">Delhi</option>
-                                                <option value="Bangalore">Bangalore</option>
-                                                <option value="Hyderabad">Hyderabad</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="monthName">
-                                                Month Name
-                                            </label>
-                                            <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                   id="monthName" type="text" placeholder="e.g. January 2023" required>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="soldQuantity">
-                                                Sold Quantity
-                                            </label>
-                                            <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                   id="soldQuantity" type="number" placeholder="Enter quantity">
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="grossSales">
-                                                Gross Sales ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="grossSales" type="number" step="0.01" placeholder="0.00" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="chargeback">
-                                                Chargeback ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="chargeback" type="number" step="0.01" placeholder="0.00">
-                                            </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="prepayment">
-                                                Prepayment ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="prepayment" type="number" step="0.01" placeholder="0.00">
-                                            </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="wrongStickers">
-                                                Wrong Stickers ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="wrongStickers" type="number" step="0.01" placeholder="0.00">
-                                            </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="productCost">
-                                                Product Cost ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="productCost" type="number" step="0.01" placeholder="0.00">
-                                            </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label class="block text-gray-700 text-sm font-medium mb-2" for="netDueAmount">
-                                                Net Due Amount ($)
-                                            </label>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-gray-500">$</span>
-                                                </div>
-                                                <input class="pl-10 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-100" 
-                                                       id="netDueAmount" type="text" placeholder="0.00" readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex justify-end">
-                                        <button type="submit" class="btn-primary py-3 px-6 font-semibold rounded-lg shadow-md">
-                                            Save Record
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        
-                        <!-- Records Page -->
-                        <div id="records" class="page">
-                            <div class="glass-effect p-6 mb-6">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h2 class="text-xl font-bold text-gray-800">Sales Records</h2>
-                                    <div class="relative">
-                                        <input type="text" id="searchInput" placeholder="Search records..." 
-                                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-search text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="table-container">
-                                    <table id="recordsTable">
-                                        <thead>
-                                            <tr>
-                                                <th>Unit Name</th>
-                                                <th>Month</th>
-                                                <th>Sold Qty</th>
-                                                <th>Gross Sales</th>
-                                                <th>Net Due</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="recordsBody">
-                                            <!-- Records will be populated here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <div class="flex justify-between items-center mt-6">
-                                    <div class="text-sm text-gray-600" id="recordsInfo">
-                                        Showing 0 to 0 of 0 entries
-                                    </div>
-                                    <div class="flex space-x-2" id="pagination">
-                                        <button class="px-3 py-1 bg-gray-200 rounded-md text-gray-700" id="prevBtn">Previous</button>
-                                        <button class="px-3 py-1 bg-blue-600 text-white rounded-md">1</button>
-                                        <button class="px-3 py-1 bg-gray-200 rounded-md text-gray-700" id="nextBtn">Next</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Import/Export Page -->
-                        <div id="importExport" class="page">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div class="glass-effect p-6">
-                                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                        <i class="fas fa-file-export mr-2"></i> Export Data
-                                    </h3>
-                                    <p class="text-gray-600 mb-4">Export your sales data to Excel or CSV format for external use or backup.</p>
-                                    <div class="flex flex-col space-y-3">
-                                        <button id="exportExcel" class="btn-primary py-2 flex items-center justify-center">
-                                            <i class="fas fa-file-excel mr-2"></i> Export to Excel
-                                        </button>
-                                        <button id="exportCSV" class="btn-primary py-2 flex items-center justify-center">
-                                            <i class="fas fa-file-csv mr-2"></i> Export to CSV
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="glass-effect p-6">
-                                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                                        <i class="fas fa-file-import mr-2"></i> Import Data
-                                    </h3>
-                                    <p class="text-gray-600 mb-4">Import sales data from Excel or CSV files. Use the template to ensure correct formatting.</p>
-                                    <div class="flex flex-col space-y-3">
-                                        <button id="downloadTemplate" class="btn-primary py-2 flex items-center justify-center">
-                                            <i class="fas fa-download mr-2"></i> Download Template
-                                        </button>
-                                        <label class="btn-primary py-2 flex items-center justify-center cursor-pointer">
-                                            <i class="fas fa-upload mr-2"></i> Import File
-                                            <input type="file" id="importFile" class="hidden" accept=".xlsx,.xls,.csv">
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="glass-effect p-6">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4">Instructions</h3>
-                                <ul class="list-disc pl-5 space-y-2 text-gray-600">
-                                    <li>Always use the provided template to ensure proper formatting</li>
-                                    <li>Required fields: Unit Name, Month Name, Gross Sales, Net Due Amount</li>
-                                    <li>Date format should be "Month Year" (e.g., "January 2023")</li>
-                                    <li>All currency values should be numbers without currency symbols</li>
-                                    <li>After import, verify your data on the Records page</li>
-                                </ul>
-                            </div>
-                        </div>
-                        
-                        <!-- Settings Page -->
-                        <div id="settings" class="page">
-                            <div class="glass-effect p-6 mb-6">
-                                <h2 class="text-xl font-bold text-gray-800 mb-6">Settings</h2>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <h3 class="text-lg font-medium text-gray-800 mb-4">Profile Settings</h3>
-                                        
-                                        <div class="space-y-4">
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="fullName">
-                                                    Full Name
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="fullName" type="text" value="Admin User">
-                                            </div>
-                                            
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="email">
-                                                    Email Address
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="email" type="email" value="admin@salesportal.com">
-                                            </div>
-                                            
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="phone">
-                                                    Phone Number
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="phone" type="tel" value="+1 (555) 123-4567">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <h3 class="text-lg font-medium text-gray-800 mb-4">Security Settings</h3>
-                                        
-                                        <div class="space-y-4">
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="currentPassword">
-                                                    Current Password
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="currentPassword" type="password">
-                                            </div>
-                                            
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="newPassword">
-                                                    New Password
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="newPassword" type="password">
-                                            </div>
-                                            
-                                            <div>
-                                                <label class="block text-gray-700 text-sm font-medium mb-2" for="confirmPassword">
-                                                    Confirm New Password
-                                                </label>
-                                                <input class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                                                       id="confirmPassword" type="password">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-8 flex justify-end">
-                                    <button class="btn-primary py-3 px-6 font-semibold rounded-lg shadow-md">
-                                        Save Changes
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Footer -->
-                    <footer class="text-center text-gray-600 text-sm">
-                        <p>Designed & Developed with ❤️ by Amit Chaudhary</p>
-                    </footer>
-                </div>
+
+        <!-- Entries Table -->
+        <div class="overflow-x-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">All Entries</h2>
+                <button id="exportCsvBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow-sm text-sm">
+                    Export to Excel (CSV)
+                </button>
             </div>
+            <table class="min-w-full bg-white border border-gray-200 rounded-xl shadow-sm">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Type</th>
+                        <th class="py-3 px-6 text-left">Amount</th>
+                        <th class="py-3 px-6 text-left">Date</th>
+                        <th class="py-3 px-6 text-left">Description</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="entriesTableBody" class="text-gray-600 text-sm font-light">
+                    <!-- Entries will be added here dynamically -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- View Record Modal -->
-    <div id="viewRecordModal" class="modal">
+    <!-- View Modal -->
+    <div id="viewModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Record Details</h2>
-            <div id="recordDetails" class="space-y-4">
-                <!-- Record details will be populated here -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Entry Details</h3>
+                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">&times;</button>
             </div>
+            <div id="viewDetails" class="space-y-2 text-gray-700"></div>
         </div>
     </div>
 
-    <script>
-        // DOM Elements
-        const loginScreen = document.getElementById('loginScreen');
-        const appContainer = document.getElementById('appContainer');
-        const loginForm = document.getElementById('loginForm');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const dataEntryForm = document.getElementById('dataEntryForm');
-        const pageTitle = document.getElementById('pageTitle');
-        const pageSubtitle = document.getElementById('pageSubtitle');
-        const pages = document.querySelectorAll('.page');
-        const navItems = document.querySelectorAll('.nav-item');
-        const recordsBody = document.getElementById('recordsBody');
-        const recordsInfo = document.getElementById('recordsInfo');
-        const searchInput = document.getElementById('searchInput');
-        const viewRecordModal = document.getElementById('viewRecordModal');
-        const recordDetails = document.getElementById('recordDetails');
-        const closeModal = document.querySelector('.close');
-        
-        // Form fields for net due calculation
-        const grossSales = document.getElementById('grossSales');
-        const chargeback = document.getElementById('chargeback');
-        const prepayment = document.getElementById('prepayment');
-        const wrongStickers = document.getElementById('wrongStickers');
-        const productCost = document.getElementById('productCost');
-        const netDueAmount = document.getElementById('netDueAmount');
-        
-        // Sample data for records
-        let recordsData = [
-            { unitName: 'Noida', monthName: 'June 2023', soldQuantity: '120', grossSales: '12458', chargeback: '500', prepayment: '1000', wrongStickers: '200', productCost: '3000', netDueAmount: '8452' },
-            { unitName: 'Gurugram', monthName: 'June 2023', soldQuantity: '85', grossSales: '8652', chargeback: '300', prepayment: '800', wrongStickers: '150', productCost: '2500', netDueAmount: '5841' },
-            { unitName: 'Delhi', monthName: 'June 2023', soldQuantity: '105', grossSales: '10457', chargeback: '400', prepayment: '900', wrongStickers: '180', productCost: '2800', netDueAmount: '7254' },
-            { unitName: 'Noida', monthName: 'May 2023', soldQuantity: '110', grossSales: '11352', chargeback: '450', prepayment: '950', wrongStickers: '220', productCost: '3200', netDueAmount: '7854' }
-        ];
-        
-        // Check if user is already logged in
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            showApp();
-            loadRecords();
-        }
-        
-        // Login form submission
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-            
-            // Simple validation (default credentials: admin/admin)
-            if (username === 'admin' && password === 'admin') {
-                if (rememberMe) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                } else {
-                    sessionStorage.setItem('isLoggedIn', 'true');
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set Firebase debug log level
+        setLogLevel('Debug');
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // UI elements
+        const totalSalaryEl = document.getElementById('totalSalary');
+        const totalPendingEl = document.getElementById('totalPending');
+        const totalSavingsEl = document.getElementById('totalSavings');
+        const totalInvestmentEl = document.getElementById('totalInvestment');
+        const totalExpenseEl = document.getElementById('totalExpense');
+        const balanceEl = document.getElementById('balance');
+        const entriesTableBody = document.getElementById('entriesTableBody');
+        const entryForm = document.getElementById('entryForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const confirmationSection = document.getElementById('confirmationSection');
+        const confirmationDetails = document.getElementById('confirmationDetails');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const loadingEl = document.getElementById('loading');
+        const percentageInputDiv = document.getElementById('percentageInputDiv');
+        const amountInput = document.getElementById('amount');
+        const percentageInput = document.getElementById('percentage');
+        const exportCsvBtn = document.getElementById('exportCsvBtn');
+        const viewModal = document.getElementById('viewModal');
+        const viewDetails = document.getElementById('viewDetails');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // State variables
+        let userId = null;
+        let pendingEntry = null;
+        let currentTotalSalary = 0;
+        let allEntries = [];
+        let editingDocId = null;
+
+        // Function to format amount to INR currency
+        const formatAmount = (amount) => {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+            }).format(amount);
+        };
+
+        // Function to update the summary totals
+        const updateSummary = (records) => {
+            let totalSalary = 0;
+            let totalPending = 0;
+            let totalSavings = 0;
+            let totalInvestment = 0;
+            let totalExpense = 0;
+
+            records.forEach(entry => {
+                const amount = parseFloat(entry.amount);
+                switch (entry.entryType) {
+                    case 'Salary':
+                        totalSalary += amount;
+                        break;
+                    case 'Pending':
+                        totalPending += amount;
+                        break;
+                    case 'Savings':
+                        totalSavings += amount;
+                        break;
+                    case 'Investment':
+                        totalInvestment += amount;
+                        break;
+                    case 'Expense':
+                        totalExpense += amount;
+                        break;
                 }
-                showApp();
-                loadRecords();
-            } else {
-                alert('Invalid credentials. Please use admin/admin');
-            }
-        });
-        
-        // Logout functionality
-        logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('isLoggedIn');
-            sessionStorage.removeItem('isLoggedIn');
-            showLogin();
-        });
-        
-        // Navigation
-        navItems.forEach(item => {
-            if (item.id !== 'logoutBtn') {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const pageId = this.getAttribute('data-page');
-                    
-                    // Update active nav item
-                    navItems.forEach(navItem => {
-                        navItem.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Show the selected page
-                    showPage(pageId);
-                    
-                    // Load records if records page is selected
-                    if (pageId === 'records') {
-                        loadRecords();
-                    }
-                });
-            }
-        });
-        
-        // Calculate net due amount when values change
-        [grossSales, chargeback, prepayment, wrongStickers, productCost].forEach(input => {
-            input.addEventListener('input', calculateNetDue);
-        });
-        
-        // Data entry form submission
-        dataEntryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form values
-            const unitName = document.getElementById('unitName').value;
-            const monthName = document.getElementById('monthName').value;
-            const soldQuantity = document.getElementById('soldQuantity').value;
-            
-            // Validate required fields
-            if (!unitName || !monthName || !grossSales.value) {
-                alert('Please fill in all required fields');
-                return;
-            }
-            
-            // Create new record
-            const newRecord = {
-                unitName: unitName,
-                monthName: monthName,
-                soldQuantity: soldQuantity,
-                grossSales: grossSales.value,
-                chargeback: chargeback.value || '0',
-                prepayment: prepayment.value || '0',
-                wrongStickers: wrongStickers.value || '0',
-                productCost: productCost.value || '0',
-                netDueAmount: netDueAmount.value
-            };
-            
-            // Add to records data
-            recordsData.push(newRecord);
-            
-            // Show success message
-            alert('Data saved successfully!');
-            
-            // Reset form
-            this.reset();
-            netDueAmount.value = '0.00';
-            
-            // If on records page, reload records
-            if (document.getElementById('records').classList.contains('active')) {
-                loadRecords();
-            }
-        });
-        
-        // Export to Excel
-        document.getElementById('exportExcel').addEventListener('click', function() {
-            exportToExcel();
-        });
-        
-        // Export to CSV
-        document.getElementById('exportCSV').addEventListener('click', function() {
-            exportToCSV();
-        });
-        
-        // Download template
-        document.getElementById('downloadTemplate').addEventListener('click', function() {
-            downloadTemplate();
-        });
-        
-        // Import file
-        document.getElementById('importFile').addEventListener('change', function(e) {
-            importFile(e.target.files[0]);
-        });
-        
-        // Search functionality
-        searchInput.addEventListener('input', function() {
-            loadRecords();
-        });
-        
-        // Close modal
-        closeModal.addEventListener('click', function() {
-            viewRecordModal.style.display = 'none';
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === viewRecordModal) {
-                viewRecordModal.style.display = 'none';
-            }
-        });
-        
-        // Calculate net due amount
-        function calculateNetDue() {
-            const gross = parseFloat(grossSales.value) || 0;
-            const cb = parseFloat(chargeback.value) || 0;
-            const prepay = parseFloat(prepayment.value) || 0;
-            const wrong = parseFloat(wrongStickers.value) || 0;
-            const cost = parseFloat(productCost.value) || 0;
-            
-            const netDue = gross - (cb + prepay + wrong + cost);
-            netDueAmount.value = netDue.toFixed(2);
-        }
-        
-        // Load records into table
-        function loadRecords() {
-            const searchTerm = searchInput.value.toLowerCase();
-            
-            // Filter records based on search term
-            const filteredRecords = recordsData.filter(record => {
-                return (
-                    record.unitName.toLowerCase().includes(searchTerm) ||
-                    record.monthName.toLowerCase().includes(searchTerm) ||
-                    record.grossSales.includes(searchTerm) ||
-                    record.netDueAmount.includes(searchTerm)
-                );
             });
-            
-            // Clear table body
-            recordsBody.innerHTML = '';
-            
-            // Add records to table
-            filteredRecords.forEach((record, index) => {
+
+            currentTotalSalary = totalSalary;
+            const balance = totalSalary - totalPending - totalSavings - totalInvestment - totalExpense;
+
+            totalSalaryEl.textContent = formatAmount(totalSalary);
+            totalPendingEl.textContent = formatAmount(totalPending);
+            totalSavingsEl.textContent = formatAmount(totalSavings);
+            totalInvestmentEl.textContent = formatAmount(totalInvestment);
+            totalExpenseEl.textContent = formatAmount(totalExpense);
+            balanceEl.textContent = formatAmount(balance);
+        };
+
+        // Function to render entries to the table
+        const renderEntries = (entries) => {
+            entriesTableBody.innerHTML = '';
+            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+            allEntries = entries; // Update the global array
+
+            entries.forEach(entry => {
                 const row = document.createElement('tr');
+                row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-50');
+
+                let typeColor;
+                switch (entry.entryType) {
+                    case 'Salary': typeColor = 'text-green-600'; break;
+                    case 'Pending': typeColor = 'text-red-600'; break;
+                    case 'Savings': typeColor = 'text-yellow-600'; break;
+                    case 'Investment': typeColor = 'text-indigo-600'; break;
+                    case 'Expense': typeColor = 'text-gray-600'; break;
+                    default: typeColor = 'text-gray-600';
+                }
+
                 row.innerHTML = `
-                    <td>${record.unitName}</td>
-                    <td>${record.monthName}</td>
-                    <td>${record.soldQuantity}</td>
-                    <td>$${record.grossSales}</td>
-                    <td>$${record.netDueAmount}</td>
-                    <td>
-                        <button class="text-blue-600 hover:text-blue-800 mr-2 view-btn" data-index="${index}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="text-blue-600 hover:text-blue-800 mr-2 edit-btn" data-index="${index}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="text-red-600 hover:text-red-800 delete-btn" data-index="${index}">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    <td class="py-3 px-6 whitespace-nowrap">
+                        <span class="font-medium ${typeColor}">${entry.entryType}</span>
+                    </td>
+                    <td class="py-3 px-6 whitespace-nowrap font-semibold">${formatAmount(entry.amount)}</td>
+                    <td class="py-3 px-6 whitespace-nowrap">${entry.date}</td>
+                    <td class="py-3 px-6">${entry.description}</td>
+                    <td class="py-3 px-6 text-center space-x-2">
+                        <button data-doc-id="${entry.id}" class="view-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">View</button>
+                        <button data-doc-id="${entry.id}" class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">Edit</button>
+                        <button data-doc-id="${entry.id}" class="delete-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">Delete</button>
                     </td>
                 `;
-                recordsBody.appendChild(row);
+                entriesTableBody.appendChild(row);
             });
-            
-            // Update records info
-            recordsInfo.textContent = `Showing ${filteredRecords.length} records`;
-            
-            // Add event listeners to buttons
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    viewRecord(index);
-                });
-            });
-            
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    editRecord(index);
-                });
-            });
-            
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = this.getAttribute('data-index');
-                    deleteRecord(index);
-                });
-            });
-        }
-        
-        // View record details
-        function viewRecord(index) {
-            const record = recordsData[index];
-            
-            recordDetails.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div><strong>Unit Name:</strong></div><div>${record.unitName}</div>
-                    <div><strong>Month Name:</strong></div><div>${record.monthName}</div>
-                    <div><strong>Sold Quantity:</strong></div><div>${record.soldQuantity}</div>
-                    <div><strong>Gross Sales:</strong></div><div>$${record.grossSales}</div>
-                    <div><strong>Chargeback:</strong></div><div>$${record.chargeback}</div>
-                    <div><strong>Prepayment:</strong></div><div>$${record.prepayment}</div>
-                    <div><strong>Wrong Stickers:</strong></div><div>$${record.wrongStickers}</div>
-                    <div><strong>Product Cost:</strong></div><div>$${record.productCost}</div>
-                    <div><strong>Net Due Amount:</strong></div><div>$${record.netDueAmount}</div>
-                </div>
-            `;
-            
-            viewRecordModal.style.display = 'block';
-        }
-        
-        // Edit record
-        function editRecord(index) {
-            // For simplicity, we'll just alert which record to edit
-            alert(`Edit functionality would open for record ${index}`);
-            // In a real application, you would populate the data entry form with this record's data
-        }
-        
-        // Delete record
-        function deleteRecord(index) {
-            if (confirm('Are you sure you want to delete this record?')) {
-                recordsData.splice(index, 1);
-                loadRecords();
-                alert('Record deleted successfully!');
+        };
+
+        // Function to delete an entry
+        const deleteEntry = async (docId) => {
+            if (!userId) {
+                console.error("User not authenticated. Cannot delete entry.");
+                return;
             }
-        }
-        
-        // Export to Excel
-        function exportToExcel() {
-            // Create worksheet
-            const ws = XLSX.utils.json_to_sheet(recordsData);
-            
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Sales Data');
-            
-            // Generate Excel file and trigger download
-            XLSX.writeFile(wb, 'sales_data.xlsx');
-            alert('Data exported to Excel successfully!');
-        }
-        
-        // Export to CSV
-        function exportToCSV() {
-            // Convert records to CSV
-            const headers = ['Unit Name', 'Month Name', 'Sold Quantity', 'Gross Sales', 'Chargeback', 'Prepayment', 'Wrong Stickers', 'Product Cost', 'Net Due Amount'];
-            const csvData = [headers.join(',')];
-            
-            recordsData.forEach(record => {
-                const row = [
-                    record.unitName,
-                    record.monthName,
-                    record.soldQuantity,
-                    record.grossSales,
-                    record.chargeback,
-                    record.prepayment,
-                    record.wrongStickers,
-                    record.productCost,
-                    record.netDueAmount
-                ];
-                csvData.push(row.join(','));
-            });
-            
-            // Create download link
-            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/financial_records`, docId);
+                await deleteDoc(docRef);
+                console.log("Document successfully deleted!");
+            } catch (error) {
+                console.error("Error removing document: ", error);
+            }
+        };
+
+        // Function to export data to CSV
+        const exportToCsv = () => {
+            if (allEntries.length === 0) {
+                console.log("No data to export.");
+                return;
+            }
+
+            const headers = ["Type", "Amount", "Date", "Description"];
+            const rows = allEntries.map(entry => [
+                entry.entryType,
+                entry.amount,
+                entry.date,
+                `"${entry.description.replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', 'sales_data.csv');
+            link.setAttribute('download', 'financial_entries.csv');
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        };
+
+        // Function to fill the form for editing
+        const editEntry = (entry) => {
+            editingDocId = entry.id;
+            entryForm.description.value = entry.description;
+            entryForm.date.value = entry.date;
+            entryForm.amount.value = entry.amount;
             
-            alert('Data exported to CSV successfully!');
-        }
-        
-        // Download template
-        function downloadTemplate() {
-            // Create template data
-            const templateData = [{
-                'Unit Name': 'Noida',
-                'Month Name': 'January 2023',
-                'Sold Quantity': '100',
-                'Gross Sales': '10000',
-                'Chargeback': '500',
-                'Prepayment': '1000',
-                'Wrong Stickers': '200',
-                'Product Cost': '6000',
-                'Net Due Amount': '2300'
-            }];
-            
-            // Create worksheet
-            const ws = XLSX.utils.json_to_sheet(templateData);
-            
-            // Create workbook
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Template');
-            
-            // Generate Excel file and trigger download
-            XLSX.writeFile(wb, 'sales_data_template.xlsx');
-            alert('Template downloaded successfully!');
-        }
-        
-        // Import file
-        function importFile(file) {
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    
-                    // Get first worksheet
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    // Add imported data to records
-                    recordsData = recordsData.concat(jsonData);
-                    
-                    // Reload records
-                    loadRecords();
-                    
-                    alert('Data imported successfully!');
-                } catch (error) {
-                    alert('Error importing file: ' + error.message);
+            document.querySelectorAll('input[name="entryType"]').forEach(radio => {
+                if (radio.value === entry.entryType) {
+                    radio.checked = true;
                 }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-        
-        // Show app, hide login
-        function showApp() {
-            loginScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            initCharts();
-        }
-        
-        // Show login, hide app
-        function showLogin() {
-            loginScreen.classList.remove('hidden');
-            appContainer.classList.add('hidden');
-        }
-        
-        // Show specific page
-        function showPage(pageId) {
-            // Hide all pages
-            pages.forEach(page => {
-                page.classList.remove('active');
             });
-            
-            // Show the selected page
-            document.getElementById(pageId).classList.add('active');
-            
-            // Update page title and subtitle
-            updatePageTitle(pageId);
-        }
-        
-        // Update page title and subtitle based on page
-        function updatePageTitle(pageId) {
-            switch(pageId) {
-                case 'dashboard':
-                    pageTitle.textContent = 'Dashboard';
-                    pageSubtitle.textContent = 'Welcome back, Admin! Here\'s your analytics report.';
-                    break;
-                case 'dataEntry':
-                    pageTitle.textContent = 'Data Entry';
-                    pageSubtitle.textContent = 'Add new sales records to the system.';
-                    break;
-                case 'records':
-                    pageTitle.textContent = 'Records';
-                    pageSubtitle.textContent = 'View and manage all sales records.';
-                    break;
-                case 'importExport':
-                    pageTitle.textContent = 'Import/Export';
-                    pageSubtitle.textContent = 'Import or export sales data.';
-                    break;
-                case 'settings':
-                    pageTitle.textContent = 'Settings';
-                    pageSubtitle.textContent = 'Manage your account settings and preferences.';
-                    break;
+
+            if (entry.entryType === 'Savings' || entry.entryType === 'Investment') {
+                 percentageInputDiv.classList.remove('hidden');
+                 amountInput.disabled = true;
+                 const percentage = (entry.amount / currentTotalSalary) * 100;
+                 percentageInput.value = isNaN(percentage) ? 0 : percentage.toFixed(2);
+            } else {
+                 percentageInputDiv.classList.add('hidden');
+                 amountInput.disabled = false;
+                 percentageInput.value = '';
             }
-        }
-        
-        // Initialize charts
-        function initCharts() {
-            // Sales by Month Chart
-            const salesCtx = document.getElementById('salesChart').getContext('2d');
-            new Chart(salesCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Gross Sales',
-                        data: [12000, 19000, 15000, 25000, 22000, 30000],
-                        backgroundColor: '#4361ee',
-                        borderColor: '#4361ee',
-                        borderWidth: 1
-                    }, {
-                        label: 'Net Due',
-                        data: [8000, 12000, 10000, 18000, 15000, 22000],
-                        backgroundColor: '#4cc9f0',
-                        borderColor: '#4cc9f0',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
+
+            submitBtn.textContent = 'Save Changes';
+            cancelEditBtn.classList.remove('hidden');
+        };
+
+        // Function to reset the form
+        const resetForm = () => {
+            entryForm.reset();
+            submitBtn.textContent = 'Add Entry';
+            cancelEditBtn.classList.add('hidden');
+            editingDocId = null;
+        };
+
+        // Authenticate and set up Firestore listener
+        onAuthStateChanged(auth, async (user) => {
+            try {
+                if (user) {
+                    userId = user.uid;
+                    userIdDisplay.textContent = userId;
+                    loadingEl.classList.add('hidden');
+
+                    const financialRecordsCol = collection(db, `artifacts/${appId}/users/${userId}/financial_records`);
+
+                    onSnapshot(financialRecordsCol, (snapshot) => {
+                        const records = [];
+                        snapshot.forEach(doc => records.push({ ...doc.data(), id: doc.id }));
+                        updateSummary(records);
+                        renderEntries(records);
+                    });
+                } else {
+                    // Sign in with custom token or anonymously
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
                     }
                 }
-            });
-            
-            // Revenue Distribution Chart
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(revenueCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Product Sales', 'Services', 'Licenses', 'Other'],
-                    datasets: [{
-                        data: [65, 15, 15, 5],
-                        backgroundColor: [
-                            '#4361ee',
-                            '#4cc9f0',
-                            '#f8961e',
-                            '#f72585'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
+            } catch (error) {
+                console.error("Authentication or Firestore setup error:", error);
+                userIdDisplay.textContent = 'Auth Error';
+                loadingEl.classList.add('hidden');
+            }
+        });
+
+        // Handle form submission
+        entryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const description = form.description.value;
+            const date = form.date.value;
+            const entryType = form.entryType.value;
+            let amount;
+
+            if (percentageInputDiv.classList.contains('hidden')) {
+                amount = parseFloat(form.amount.value);
+            } else {
+                const percentage = parseFloat(form.percentage.value);
+                amount = (currentTotalSalary * percentage) / 100;
+                if (isNaN(amount)) {
+                    amount = 0;
                 }
-            });
-        }
-        
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add fade-in animation to elements
-            const elements = document.querySelectorAll('.glass-effect, .summary-card');
-            elements.forEach((element, index) => {
-                element.style.animationDelay = `${index * 0.1}s`;
-                element.classList.add('fade-in');
+            }
+
+            const entryData = {
+                entryType,
+                amount: amount,
+                currency: '₹',
+                date,
+                description,
+                timestamp: serverTimestamp()
+            };
+
+            if (editingDocId) {
+                try {
+                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/financial_records`, editingDocId);
+                    await updateDoc(docRef, entryData);
+                    console.log("Document successfully updated!");
+                    resetForm();
+                } catch (e) {
+                    console.error("Error updating document: ", e);
+                }
+            } else {
+                // Confirmation logic for new entry
+                pendingEntry = entryData;
+                confirmationDetails.innerHTML = `
+                    <p><strong>Type:</strong> ${pendingEntry.entryType}</p>
+                    <p><strong>Amount:</strong> ${formatAmount(pendingEntry.amount)}</p>
+                    <p><strong>Date:</strong> ${pendingEntry.date}</p>
+                    <p><strong>Description:</strong> ${pendingEntry.description}</p>
+                `;
+                confirmationSection.classList.remove('hidden');
+            }
+        });
+
+        // Handle confirmation button click
+        confirmBtn.addEventListener('click', async () => {
+            if (!pendingEntry) return;
+
+            try {
+                if (userId) {
+                    const financialRecordsCol = collection(db, `artifacts/${appId}/users/${userId}/financial_records`);
+                    await addDoc(financialRecordsCol, pendingEntry);
+                    
+                    // Clear the form and hide confirmation
+                    entryForm.reset();
+                    pendingEntry = null;
+                    confirmationSection.classList.add('hidden');
+                } else {
+                    console.error("User not authenticated. Cannot save entry.");
+                }
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        });
+
+        // Handle cancel button click
+        cancelBtn.addEventListener('click', () => {
+            pendingEntry = null;
+            confirmationSection.classList.add('hidden');
+        });
+
+        // Event listeners for actions on the table
+        entriesTableBody.addEventListener('click', (e) => {
+            const docId = e.target.dataset.docId;
+            const entry = allEntries.find(ent => ent.id === docId);
+            if (!entry) return;
+
+            if (e.target.classList.contains('delete-btn')) {
+                deleteEntry(docId);
+            } else if (e.target.classList.contains('view-btn')) {
+                viewDetails.innerHTML = `
+                    <p><strong>Type:</strong> ${entry.entryType}</p>
+                    <p><strong>Amount:</strong> ${formatAmount(entry.amount)}</p>
+                    <p><strong>Date:</strong> ${entry.date}</p>
+                    <p><strong>Description:</strong> ${entry.description}</p>
+                `;
+                viewModal.style.display = 'block';
+            } else if (e.target.classList.contains('edit-btn')) {
+                editEntry(entry);
+            }
+        });
+
+        // Event listener for cancel edit button
+        cancelEditBtn.addEventListener('click', resetForm);
+
+        // Event listener for export button
+        exportCsvBtn.addEventListener('click', exportToCsv);
+
+        // Event listener for modal close button
+        closeModalBtn.addEventListener('click', () => {
+            viewModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target == viewModal) {
+                viewModal.style.display = 'none';
+            }
+        });
+
+        // Set default date to today's date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+
+        // Show/hide percentage input based on entry type
+        document.querySelectorAll('input[name="entryType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'Savings' || e.target.value === 'Investment') {
+                    percentageInputDiv.classList.remove('hidden');
+                    amountInput.disabled = true;
+                    if (editingDocId) {
+                         const percentage = (amountInput.value / currentTotalSalary) * 100;
+                         percentageInput.value = isNaN(percentage) ? 0 : percentage.toFixed(2);
+                    }
+                } else {
+                    percentageInputDiv.classList.add('hidden');
+                    amountInput.disabled = false;
+                    percentageInput.value = '';
+                }
             });
         });
+
     </script>
 </body>
 </html>
