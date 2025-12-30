@@ -1,587 +1,462 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Manager</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Monthly Budget Tracker</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
+
         .container {
-            max-width: 960px;
+            max-width: 800px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .input-group input {
             width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
-        .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .expense-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .expense-item input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .summary {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .summary h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .summary .amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .email-section {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .email-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .notification {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .notification.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .expense-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+
+        .expense-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .expense-list-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8">
-    <div class="container bg-white rounded-xl shadow-lg p-6 sm:p-8">
-        <h1 class="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-2">Financial Manager</h1>
-        <p class="text-center text-gray-500 mb-6 sm:mb-8">Track your income and outstanding amounts with ease.</p>
-
-        <!-- User ID Display -->
-        <div id="auth-status" class="flex flex-col sm:flex-row items-center justify-between bg-gray-50 p-4 rounded-lg shadow-inner mb-6">
-            <div class="text-sm text-gray-700 mb-2 sm:mb-0">
-                <span class="font-semibold">User ID:</span>
-                <span id="userIdDisplay" class="font-mono text-xs break-all">Connecting...</span>
-            </div>
-            <div id="loading" class="text-sm font-medium text-blue-600 animate-pulse">Loading...</div>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Monthly Budget Tracker</h1>
+            <p>Apne monthly budget ko smart tareeke se manage karein</p>
         </div>
 
-        <!-- Summary Section -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 sm:mb-8 text-center">
-            <div class="bg-green-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-green-700 font-medium">Total Salary</p>
-                <p id="totalSalary" class="text-2xl font-bold text-green-800 mt-1">₹ 0.00</p>
+        <div class="main-content">
+            <!-- Salary Input Section -->
+            <div class="section">
+                <h2>💰 Monthly Salary</h2>
+                <div class="input-group">
+                    <label for="salary">Apni monthly salary enter karein (₹):</label>
+                    <input type="number" id="salary" placeholder="eg: 50000" min="0">
+                </div>
             </div>
-            <div class="bg-red-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-red-700 font-medium">Total Pending</p>
-                <p id="totalPending" class="text-2xl font-bold text-red-800 mt-1">₹ 0.00</p>
-            </div>
-            <div class="bg-yellow-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-yellow-700 font-medium">Total Savings</p>
-                <p id="totalSavings" class="text-2xl font-bold text-yellow-800 mt-1">₹ 0.00</p>
-            </div>
-            <div class="bg-indigo-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-indigo-700 font-medium">Total Investment</p>
-                <p id="totalInvestment" class="text-2xl font-bold text-indigo-800 mt-1">₹ 0.00</p>
-            </div>
-            <div class="bg-gray-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-gray-700 font-medium">Total Expense</p>
-                <p id="totalExpense" class="text-2xl font-bold text-gray-800 mt-1">₹ 0.00</p>
-            </div>
-            <div class="bg-blue-100 rounded-lg p-4 shadow-sm">
-                <p class="text-sm text-blue-700 font-medium">Balance</p>
-                <p id="balance" class="text-2xl font-bold text-blue-800 mt-1">₹ 0.00</p>
-            </div>
-        </div>
 
-        <!-- Input Form -->
-        <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-6 sm:mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Add New Entry</h2>
-            <form id="entryForm" class="space-y-4">
-                <div>
-                    <label for="entryType" class="block text-gray-700 font-medium mb-1">Entry Type</label>
-                    <div class="flex flex-wrap gap-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="entryType" value="Salary" class="form-radio text-green-600 rounded-full" checked>
-                            <span class="ml-2 text-gray-700">Salary</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="entryType" value="Pending" class="form-radio text-red-600 rounded-full">
-                            <span class="ml-2 text-gray-700">Pending</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="entryType" value="Savings" class="form-radio text-yellow-600 rounded-full">
-                            <span class="ml-2 text-gray-700">Savings</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="entryType" value="Investment" class="form-radio text-indigo-600 rounded-full">
-                            <span class="ml-2 text-gray-700">Investment</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="entryType" value="Expense" class="form-radio text-gray-600 rounded-full">
-                            <span class="ml-2 text-gray-700">Expense</span>
-                        </label>
+            <!-- Fixed Expenses Section -->
+            <div class="section">
+                <h2>🏠 Fixed Expenses</h2>
+                <div id="expenseInputs">
+                    <div class="expense-item">
+                        <input type="text" placeholder="Expense name (eg: Rent)" class="expense-name">
+                        <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
+                        <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
                     </div>
                 </div>
-                <div>
-                    <label for="amount" class="block text-gray-700 font-medium mb-1">Amount</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500">₹</span>
-                        </div>
-                        <input type="number" id="amount" name="amount" class="block w-full pl-8 pr-2 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
-                    </div>
-                </div>
-                <div id="percentageInputDiv" class="hidden">
-                    <label for="percentage" class="block text-gray-700 font-medium mb-1">Percentage (%)</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <input type="number" id="percentage" name="percentage" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500">%</span>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label for="description" class="block text-gray-700 font-medium mb-1">Description</label>
-                    <input type="text" id="description" name="description" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
-                </div>
-                <div>
-                    <label for="date" class="block text-gray-700 font-medium mb-1">Date</label>
-                    <input type="date" id="date" name="date" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" required>
-                </div>
-                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
-                    Add Entry
-                </button>
-                <button type="button" id="cancelEditBtn" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md hidden">
-                    Cancel Edit
-                </button>
-            </form>
-        </div>
+                <button class="btn btn-primary" onclick="addExpense()">➕ Add Expense</button>
+            </div>
 
-        <!-- Confirmation Section (for add) -->
-        <div id="confirmationSection" class="bg-yellow-100 p-6 rounded-xl shadow-inner mb-6 sm:mb-8 hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Confirm Entry</h2>
-            <div id="confirmationDetails" class="text-gray-700 space-y-2 mb-4"></div>
-            <div class="flex gap-4">
-                <button id="confirmBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
-                    Confirm and Save
-                </button>
-                <button id="cancelBtn" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
-                    Cancel
+            <!-- Calculate Button -->
+            <div class="section">
+                <button class="btn btn-success" onclick="calculateBudget()" style="width: 100%; font-size: 18px;">
+                    📈 Calculate Budget
                 </button>
             </div>
-        </div>
 
-        <!-- Entries Table -->
-        <div class="overflow-x-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">All Entries</h2>
-                <button id="exportCsvBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow-sm text-sm">
-                    Export to Excel (CSV)
-                </button>
+            <!-- Summary Section -->
+            <div id="summarySection" style="display: none;">
+                <div class="summary">
+                    <h3>💡 Aapka Monthly Budget Summary</h3>
+                    <div>
+                        <div>Total Salary: <span id="totalSalary" class="amount">₹0</span></div>
+                        <div>Total Expenses: <span id="totalExpenses" class="amount">₹0</span></div>
+                        <div>Bacha Hua Amount: <span id="remainingAmount" class="amount">₹0</span></div>
+                    </div>
+                </div>
             </div>
-            <table class="min-w-full bg-white border border-gray-200 rounded-xl shadow-sm">
-                <thead>
-                    <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                        <th class="py-3 px-6 text-left">Type</th>
-                        <th class="py-3 px-6 text-left">Amount</th>
-                        <th class="py-3 px-6 text-left">Date</th>
-                        <th class="py-3 px-6 text-left">Description</th>
-                        <th class="py-3 px-6 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="entriesTableBody" class="text-gray-600 text-sm font-light">
-                    <!-- Entries will be added here dynamically -->
-                </tbody>
-            </table>
+
+            <!-- Email Notification Section -->
+            <div id="emailSection" class="email-section" style="display: none;">
+                <h3>📧 Email Notification</h3>
+                <div class="input-group">
+                    <label for="email">Apna email address enter karein:</label>
+                    <input type="email" id="email" placeholder="your.email@example.com">
+                </div>
+                <button class="btn btn-primary" onclick="sendEmailNotification()">
+                    📤 Email Bhejiye
+                </button>
+                <div id="emailStatus"></div>
+            </div>
+
+            <!-- Expense List -->
+            <div id="expenseListSection" style="display: none;">
+                <div class="section">
+                    <h2>📋 Aapke Expenses</h2>
+                    <div id="expenseList" class="expense-list"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- View Modal -->
-    <div id="viewModal" class="modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Entry Details</h3>
-                <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">&times;</button>
-            </div>
-            <div id="viewDetails" class="space-y-2 text-gray-700"></div>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Set Firebase debug log level
-        setLogLevel('Debug');
-
-        // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // UI elements
-        const totalSalaryEl = document.getElementById('totalSalary');
-        const totalPendingEl = document.getElementById('totalPending');
-        const totalSavingsEl = document.getElementById('totalSavings');
-        const totalInvestmentEl = document.getElementById('totalInvestment');
-        const totalExpenseEl = document.getElementById('totalExpense');
-        const balanceEl = document.getElementById('balance');
-        const entriesTableBody = document.getElementById('entriesTableBody');
-        const entryForm = document.getElementById('entryForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const cancelEditBtn = document.getElementById('cancelEditBtn');
-        const confirmationSection = document.getElementById('confirmationSection');
-        const confirmationDetails = document.getElementById('confirmationDetails');
-        const confirmBtn = document.getElementById('confirmBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const userIdDisplay = document.getElementById('userIdDisplay');
-        const loadingEl = document.getElementById('loading');
-        const percentageInputDiv = document.getElementById('percentageInputDiv');
-        const amountInput = document.getElementById('amount');
-        const percentageInput = document.getElementById('percentage');
-        const exportCsvBtn = document.getElementById('exportCsvBtn');
-        const viewModal = document.getElementById('viewModal');
-        const viewDetails = document.getElementById('viewDetails');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-
-        // State variables
-        let userId = null;
-        let pendingEntry = null;
-        let currentTotalSalary = 0;
-        let allEntries = [];
-        let editingDocId = null;
-
-        // Function to format amount to INR currency
-        const formatAmount = (amount) => {
-            return new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-            }).format(amount);
+    <script>
+        let budgetData = {
+            salary: 0,
+            expenses: [],
+            remaining: 0
         };
 
-        // Function to update the summary totals
-        const updateSummary = (records) => {
-            let totalSalary = 0;
-            let totalPending = 0;
-            let totalSavings = 0;
-            let totalInvestment = 0;
-            let totalExpense = 0;
+        function addExpense() {
+            const expenseInputs = document.getElementById('expenseInputs');
+            const newExpense = document.createElement('div');
+            newExpense.className = 'expense-item';
+            newExpense.innerHTML = `
+                <input type="text" placeholder="Expense name (eg: Rent)" class="expense-name">
+                <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
+                <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
+            `;
+            expenseInputs.appendChild(newExpense);
+        }
 
-            records.forEach(entry => {
-                const amount = parseFloat(entry.amount);
-                switch (entry.entryType) {
-                    case 'Salary':
-                        totalSalary += amount;
-                        break;
-                    case 'Pending':
-                        totalPending += amount;
-                        break;
-                    case 'Savings':
-                        totalSavings += amount;
-                        break;
-                    case 'Investment':
-                        totalInvestment += amount;
-                        break;
-                    case 'Expense':
-                        totalExpense += amount;
-                        break;
-                }
-            });
-
-            currentTotalSalary = totalSalary;
-            const balance = totalSalary - totalPending - totalSavings - totalInvestment - totalExpense;
-
-            totalSalaryEl.textContent = formatAmount(totalSalary);
-            totalPendingEl.textContent = formatAmount(totalPending);
-            totalSavingsEl.textContent = formatAmount(totalSavings);
-            totalInvestmentEl.textContent = formatAmount(totalInvestment);
-            totalExpenseEl.textContent = formatAmount(totalExpense);
-            balanceEl.textContent = formatAmount(balance);
-        };
-
-        // Function to render entries to the table
-        const renderEntries = (entries) => {
-            entriesTableBody.innerHTML = '';
-            entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-            allEntries = entries; // Update the global array
-
-            entries.forEach(entry => {
-                const row = document.createElement('tr');
-                row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-50');
-
-                let typeColor;
-                switch (entry.entryType) {
-                    case 'Salary': typeColor = 'text-green-600'; break;
-                    case 'Pending': typeColor = 'text-red-600'; break;
-                    case 'Savings': typeColor = 'text-yellow-600'; break;
-                    case 'Investment': typeColor = 'text-indigo-600'; break;
-                    case 'Expense': typeColor = 'text-gray-600'; break;
-                    default: typeColor = 'text-gray-600';
-                }
-
-                row.innerHTML = `
-                    <td class="py-3 px-6 whitespace-nowrap">
-                        <span class="font-medium ${typeColor}">${entry.entryType}</span>
-                    </td>
-                    <td class="py-3 px-6 whitespace-nowrap font-semibold">${formatAmount(entry.amount)}</td>
-                    <td class="py-3 px-6 whitespace-nowrap">${entry.date}</td>
-                    <td class="py-3 px-6">${entry.description}</td>
-                    <td class="py-3 px-6 text-center space-x-2">
-                        <button data-doc-id="${entry.id}" class="view-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">View</button>
-                        <button data-doc-id="${entry.id}" class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">Edit</button>
-                        <button data-doc-id="${entry.id}" class="delete-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded-lg text-xs transition-colors shadow-sm">Delete</button>
-                    </td>
-                `;
-                entriesTableBody.appendChild(row);
-            });
-        };
-
-        // Function to delete an entry
-        const deleteEntry = async (docId) => {
-            if (!userId) {
-                console.error("User not authenticated. Cannot delete entry.");
-                return;
+        function removeExpense(button) {
+            const expenseItems = document.querySelectorAll('.expense-item');
+            if (expenseItems.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('Kam se kam ek expense hona chahiye!');
             }
-            try {
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/financial_records`, docId);
-                await deleteDoc(docRef);
-                console.log("Document successfully deleted!");
-            } catch (error) {
-                console.error("Error removing document: ", error);
-            }
-        };
+        }
 
-        // Function to export data to CSV
-        const exportToCsv = () => {
-            if (allEntries.length === 0) {
-                console.log("No data to export.");
-                return;
-            }
-
-            const headers = ["Type", "Amount", "Date", "Description"];
-            const rows = allEntries.map(entry => [
-                entry.entryType,
-                entry.amount,
-                entry.date,
-                `"${entry.description.replace(/"/g, '""')}"`
-            ]);
-
-            const csvContent = [
-                headers.join(','),
-                ...rows.map(row => row.join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'financial_entries.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        // Function to fill the form for editing
-        const editEntry = (entry) => {
-            editingDocId = entry.id;
-            entryForm.description.value = entry.description;
-            entryForm.date.value = entry.date;
-            entryForm.amount.value = entry.amount;
+        function calculateBudget() {
+            const salary = parseFloat(document.getElementById('salary').value) || 0;
             
-            document.querySelectorAll('input[name="entryType"]').forEach(radio => {
-                if (radio.value === entry.entryType) {
-                    radio.checked = true;
-                }
-            });
-
-            if (entry.entryType === 'Savings' || entry.entryType === 'Investment') {
-                 percentageInputDiv.classList.remove('hidden');
-                 amountInput.disabled = true;
-                 const percentage = (entry.amount / currentTotalSalary) * 100;
-                 percentageInput.value = isNaN(percentage) ? 0 : percentage.toFixed(2);
-            } else {
-                 percentageInputDiv.classList.add('hidden');
-                 amountInput.disabled = false;
-                 percentageInput.value = '';
+            if (salary <= 0) {
+                alert('Kripaya valid salary amount enter karein!');
+                return;
             }
 
-            submitBtn.textContent = 'Save Changes';
-            cancelEditBtn.classList.remove('hidden');
-        };
+            const expenseNames = document.querySelectorAll('.expense-name');
+            const expenseAmounts = document.querySelectorAll('.expense-amount');
+            
+            let totalExpenses = 0;
+            let expenses = [];
 
-        // Function to reset the form
-        const resetForm = () => {
-            entryForm.reset();
-            submitBtn.textContent = 'Add Entry';
-            cancelEditBtn.classList.add('hidden');
-            editingDocId = null;
-        };
-
-        // Authenticate and set up Firestore listener
-        onAuthStateChanged(auth, async (user) => {
-            try {
-                if (user) {
-                    userId = user.uid;
-                    userIdDisplay.textContent = userId;
-                    loadingEl.classList.add('hidden');
-
-                    const financialRecordsCol = collection(db, `artifacts/${appId}/users/${userId}/financial_records`);
-
-                    onSnapshot(financialRecordsCol, (snapshot) => {
-                        const records = [];
-                        snapshot.forEach(doc => records.push({ ...doc.data(), id: doc.id }));
-                        updateSummary(records);
-                        renderEntries(records);
-                    });
-                } else {
-                    // Sign in with custom token or anonymously
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                }
-            } catch (error) {
-                console.error("Authentication or Firestore setup error:", error);
-                userIdDisplay.textContent = 'Auth Error';
-                loadingEl.classList.add('hidden');
-            }
-        });
-
-        // Handle form submission
-        entryForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const form = e.target;
-            const description = form.description.value;
-            const date = form.date.value;
-            const entryType = form.entryType.value;
-            let amount;
-
-            if (percentageInputDiv.classList.contains('hidden')) {
-                amount = parseFloat(form.amount.value);
-            } else {
-                const percentage = parseFloat(form.percentage.value);
-                amount = (currentTotalSalary * percentage) / 100;
-                if (isNaN(amount)) {
-                    amount = 0;
+            for (let i = 0; i < expenseNames.length; i++) {
+                const name = expenseNames[i].value.trim();
+                const amount = parseFloat(expenseAmounts[i].value) || 0;
+                
+                if (name && amount > 0) {
+                    expenses.push({ name, amount });
+                    totalExpenses += amount;
                 }
             }
 
-            const entryData = {
-                entryType,
-                amount: amount,
-                currency: '₹',
-                date,
-                description,
-                timestamp: serverTimestamp()
+            if (expenses.length === 0) {
+                alert('Kripaya kam se kam ek expense enter karein!');
+                return;
+            }
+
+            const remaining = salary - totalExpenses;
+
+            // Store data
+            budgetData = {
+                salary: salary,
+                expenses: expenses,
+                remaining: remaining
             };
 
-            if (editingDocId) {
-                try {
-                    const docRef = doc(db, `artifacts/${appId}/users/${userId}/financial_records`, editingDocId);
-                    await updateDoc(docRef, entryData);
-                    console.log("Document successfully updated!");
-                    resetForm();
-                } catch (e) {
-                    console.error("Error updating document: ", e);
-                }
-            } else {
-                // Confirmation logic for new entry
-                pendingEntry = entryData;
-                confirmationDetails.innerHTML = `
-                    <p><strong>Type:</strong> ${pendingEntry.entryType}</p>
-                    <p><strong>Amount:</strong> ${formatAmount(pendingEntry.amount)}</p>
-                    <p><strong>Date:</strong> ${pendingEntry.date}</p>
-                    <p><strong>Description:</strong> ${pendingEntry.description}</p>
+            // Update UI
+            document.getElementById('totalSalary').textContent = `₹${salary.toLocaleString()}`;
+            document.getElementById('totalExpenses').textContent = `₹${totalExpenses.toLocaleString()}`;
+            document.getElementById('remainingAmount').textContent = `₹${remaining.toLocaleString()}`;
+
+            // Show summary
+            document.getElementById('summarySection').style.display = 'block';
+            document.getElementById('emailSection').style.display = 'block';
+            document.getElementById('expenseListSection').style.display = 'block';
+
+            // Update expense list
+            updateExpenseList();
+
+            // Scroll to summary
+            document.getElementById('summarySection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateExpenseList() {
+            const expenseList = document.getElementById('expenseList');
+            expenseList.innerHTML = '';
+
+            budgetData.expenses.forEach(expense => {
+                const item = document.createElement('div');
+                item.className = 'expense-list-item';
+                item.innerHTML = `
+                    <span><strong>${expense.name}</strong></span>
+                    <span>₹${expense.amount.toLocaleString()}</span>
                 `;
-                confirmationSection.classList.remove('hidden');
-            }
-        });
-
-        // Handle confirmation button click
-        confirmBtn.addEventListener('click', async () => {
-            if (!pendingEntry) return;
-
-            try {
-                if (userId) {
-                    const financialRecordsCol = collection(db, `artifacts/${appId}/users/${userId}/financial_records`);
-                    await addDoc(financialRecordsCol, pendingEntry);
-                    
-                    // Clear the form and hide confirmation
-                    entryForm.reset();
-                    pendingEntry = null;
-                    confirmationSection.classList.add('hidden');
-                } else {
-                    console.error("User not authenticated. Cannot save entry.");
-                }
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-        });
-
-        // Handle cancel button click
-        cancelBtn.addEventListener('click', () => {
-            pendingEntry = null;
-            confirmationSection.classList.add('hidden');
-        });
-
-        // Event listeners for actions on the table
-        entriesTableBody.addEventListener('click', (e) => {
-            const docId = e.target.dataset.docId;
-            const entry = allEntries.find(ent => ent.id === docId);
-            if (!entry) return;
-
-            if (e.target.classList.contains('delete-btn')) {
-                deleteEntry(docId);
-            } else if (e.target.classList.contains('view-btn')) {
-                viewDetails.innerHTML = `
-                    <p><strong>Type:</strong> ${entry.entryType}</p>
-                    <p><strong>Amount:</strong> ${formatAmount(entry.amount)}</p>
-                    <p><strong>Date:</strong> ${entry.date}</p>
-                    <p><strong>Description:</strong> ${entry.description}</p>
-                `;
-                viewModal.style.display = 'block';
-            } else if (e.target.classList.contains('edit-btn')) {
-                editEntry(entry);
-            }
-        });
-
-        // Event listener for cancel edit button
-        cancelEditBtn.addEventListener('click', resetForm);
-
-        // Event listener for export button
-        exportCsvBtn.addEventListener('click', exportToCsv);
-
-        // Event listener for modal close button
-        closeModalBtn.addEventListener('click', () => {
-            viewModal.style.display = 'none';
-        });
-
-        // Close modal when clicking outside of it
-        window.addEventListener('click', (event) => {
-            if (event.target == viewModal) {
-                viewModal.style.display = 'none';
-            }
-        });
-
-        // Set default date to today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').value = today;
-
-        // Show/hide percentage input based on entry type
-        document.querySelectorAll('input[name="entryType"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.value === 'Savings' || e.target.value === 'Investment') {
-                    percentageInputDiv.classList.remove('hidden');
-                    amountInput.disabled = true;
-                    if (editingDocId) {
-                         const percentage = (amountInput.value / currentTotalSalary) * 100;
-                         percentageInput.value = isNaN(percentage) ? 0 : percentage.toFixed(2);
-                    }
-                } else {
-                    percentageInputDiv.classList.add('hidden');
-                    amountInput.disabled = false;
-                    percentageInput.value = '';
-                }
+                expenseList.appendChild(item);
             });
-        });
+        }
 
+        function sendEmailNotification() {
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email || !isValidEmail(email)) {
+                showNotification('Kripaya valid email address enter karein!', 'error');
+                return;
+            }
+
+            // Create email content
+            const subject = `Monthly Budget Report - ${new Date().toLocaleDateString('hi-IN')}`;
+            const body = `
+Namaste!
+
+Aapka monthly budget summary:
+
+💰 Total Salary: ₹${budgetData.salary.toLocaleString()}
+📉 Total Expenses: ₹${budgetData.expenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString()}
+✅ Bacha Hua Amount: ₹${budgetData.remaining.toLocaleString()}
+
+📋 Expense Details:
+${budgetData.expenses.map(exp => `• ${exp.name}: ₹${exp.amount.toLocaleString()}`).join('\n')}
+
+💡 Sujhav:
+${budgetData.remaining > 0 ? `Aap ₹${budgetData.remaining.toLocaleString()} bacha paye hain. Isse savings ya investment mein use karein!` : 'Aapka budget balanced hai.'}
+
+Dhanyavaad,
+Budget Tracker System
+            `;
+
+            // Create mailto link
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Open email client
+            window.open(mailtoLink, '_blank');
+            
+            showNotification('Email notification taiyaar hai! Aapka email client khul jayega.', 'success');
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function showNotification(message, type) {
+            const statusDiv = document.getElementById('emailStatus');
+            statusDiv.innerHTML = `<div class="notification ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Add some default expenses
+        window.onload = function() {
+            // Add common expense fields
+            const defaultExpenses = ['Rent', 'Food', 'Transport', 'Utilities'];
+            const expenseInputs = document.getElementById('expenseInputs');
+            expenseInputs.innerHTML = '';
+            
+            defaultExpenses.forEach(expense => {
+                const expenseItem = document.createElement('div');
+                expenseItem.className = 'expense-item';
+                expenseItem.innerHTML = `
+                    <input type="text" placeholder="Expense name" class="expense-name" value="${expense}">
+                    <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
+                    <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
+                `;
+                expenseInputs.appendChild(expenseItem);
+            });
+        };
     </script>
 </body>
 </html>
