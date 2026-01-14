@@ -230,8 +230,8 @@
             const u = document.getElementById('userid').value.trim();
             const p = document.getElementById('password').value.trim();
             
-            // Matches exactly: admin / amey aminehu@123
-            if (u === "admin" && p === "amey aminehu@123") {
+            // Matches exactly: admin / aminehu@123
+            if (u === "admin" && p === "aminehu@123") {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
                 window.scrollTo(0,0);
