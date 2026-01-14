@@ -1,462 +1,298 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Budget Tracker</title>
+    <title>AFX | Cyber Command Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --neon-green: #00ff41;
+            --neon-blue: #00e5ff;
+            --cyber-red: #ff003c;
+            --dark-bg: #010101;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            height: 100vh;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.25; }
+
+        /* --- LOGIN SCREEN --- */
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
         }
 
-        .header {
-            background: linear-gradient(45deg, #2c3e50, #34495e);
-            color: white;
-            padding: 30px;
+        .login-box {
+            width: 400px;
+            padding: 40px;
+            border: 2px solid var(--neon-green);
+            background: rgba(0, 20, 0, 0.9);
+            box-shadow: 0 0 50px var(--neon-green);
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            padding: 30px;
-        }
-
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border-radius: 15px;
-            background: #f8f9fa;
-        }
-
-        .section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #34495e;
-        }
-
+        .login-box h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 25px; color: var(--neon-blue); letter-spacing: 5px; }
+        
+        .input-group { margin-bottom: 20px; }
         .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            width: 100%; padding: 15px; background: #000; border: 1px solid var(--neon-green);
+            color: #fff; outline: none; font-size: 1rem; text-align: center;
         }
 
-        .input-group input:focus {
-            outline: none;
-            border-color: #3498db;
+        .login-btn {
+            width: 100%; padding: 15px; background: var(--neon-green); color: #000;
+            border: none; font-family: 'Orbitron', sans-serif; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
         }
 
-        .expense-item {
+        #error-msg { color: var(--cyber-red); margin-top: 15px; display: none; font-weight: bold; }
+
+        /* --- DASHBOARD SECTION --- */
+        #dashboard { display: none; }
+
+        /* FREEZED HEADER */
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            border-bottom: 2px solid var(--neon-blue);
+            padding: 10px 30px;
+            z-index: 999;
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(0, 229, 255, 0.2);
         }
 
-        .expense-item input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue); letter-spacing: 3px;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            font-weight: bold;
+        /* SEARCH & FILTER CONTROLS */
+        .controls { display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+        .search-box {
+            background: #000; border: 1px solid var(--neon-green); color: var(--neon-green);
+            padding: 8px 15px; font-family: 'Share Tech Mono'; width: 250px; outline: none;
         }
 
-        .btn-primary {
-            background: #3498db;
-            color: white;
+        .filter-select {
+            background: #000; border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 8px; font-family: 'Share Tech Mono'; outline: none; cursor: pointer;
         }
 
-        .btn-primary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
+        .logout-btn {
+            background: var(--cyber-red); color: #fff; border: none;
+            padding: 8px 15px; font-family: 'Orbitron'; font-size: 0.7rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .logout-btn:hover { box-shadow: 0 0 15px var(--cyber-red); }
+
+        /* CONTENT */
+        .container { margin-top: 160px; padding: 30px; max-width: 1300px; margin-left: auto; margin-right: auto; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+
+        .card {
+            background: rgba(0, 255, 65, 0.02); border: 1px solid var(--neon-green);
+            padding: 25px; transition: 0.4s; position: relative;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 92% 100%, 0% 100%);
         }
 
-        .btn-success {
-            background: #27ae60;
-            color: white;
+        .card:hover { transform: translateY(-5px); background: rgba(0, 255, 65, 0.08); border-color: #fff; }
+
+        .card h3 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); margin-bottom: 10px; font-size: 1.1rem; }
+        .card p { font-size: 0.85rem; color: #ccc; margin-bottom: 20px; line-height: 1.4; }
+
+        .cyber-btn {
+            display: block; width: 100%; text-align: center; padding: 12px;
+            border: 1px solid var(--neon-green); color: var(--neon-green);
+            text-decoration: none; font-family: 'Orbitron'; font-size: 0.8rem;
+            transition: 0.3s; font-weight: bold;
         }
 
-        .btn-success:hover {
-            background: #229954;
+        .cyber-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
+
+        /* FOOTER */
+        footer {
+            margin-top: 80px; padding: 40px; background: #000;
+            border-top: 1px solid var(--neon-blue); text-align: center;
         }
 
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
+        .footer-name { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue); }
 
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .summary {
-            background: linear-gradient(45deg, #27ae60, #2ecc71);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .summary h3 {
-            font-size: 1.8em;
-            margin-bottom: 10px;
-        }
-
-        .summary .amount {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .email-section {
-            background: #fff3cd;
-            border: 2px solid #ffeaa7;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .email-section h3 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-
-        .notification {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .notification.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .notification.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .expense-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            background: white;
-        }
-
-        .expense-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .expense-list-item:last-child {
-            border-bottom: none;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 Monthly Budget Tracker</h1>
-            <p>Apne monthly budget ko smart tareeke se manage karein</p>
-        </div>
 
-        <div class="main-content">
-            <!-- Salary Input Section -->
-            <div class="section">
-                <h2>💰 Monthly Salary</h2>
-                <div class="input-group">
-                    <label for="salary">Apni monthly salary enter karein (₹):</label>
-                    <input type="number" id="salary" placeholder="eg: 50000" min="0">
-                </div>
-            </div>
+    <canvas id="canvas"></canvas>
 
-            <!-- Fixed Expenses Section -->
-            <div class="section">
-                <h2>🏠 Fixed Expenses</h2>
-                <div id="expenseInputs">
-                    <div class="expense-item">
-                        <input type="text" placeholder="Expense name (eg: Rent)" class="expense-name">
-                        <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
-                        <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="addExpense()">➕ Add Expense</button>
+    <!-- LOGIN PANEL -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>LOGIN_REQUIRED</h2>
+            <div class="input-group">
+                <input type="text" id="userid" placeholder="ADMIN ID" autocomplete="off">
             </div>
-
-            <!-- Calculate Button -->
-            <div class="section">
-                <button class="btn btn-success" onclick="calculateBudget()" style="width: 100%; font-size: 18px;">
-                    📈 Calculate Budget
-                </button>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="PASSWORD">
             </div>
-
-            <!-- Summary Section -->
-            <div id="summarySection" style="display: none;">
-                <div class="summary">
-                    <h3>💡 Aapka Monthly Budget Summary</h3>
-                    <div>
-                        <div>Total Salary: <span id="totalSalary" class="amount">₹0</span></div>
-                        <div>Total Expenses: <span id="totalExpenses" class="amount">₹0</span></div>
-                        <div>Bacha Hua Amount: <span id="remainingAmount" class="amount">₹0</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Email Notification Section -->
-            <div id="emailSection" class="email-section" style="display: none;">
-                <h3>📧 Email Notification</h3>
-                <div class="input-group">
-                    <label for="email">Apna email address enter karein:</label>
-                    <input type="email" id="email" placeholder="your.email@example.com">
-                </div>
-                <button class="btn btn-primary" onclick="sendEmailNotification()">
-                    📤 Email Bhejiye
-                </button>
-                <div id="emailStatus"></div>
-            </div>
-
-            <!-- Expense List -->
-            <div id="expenseListSection" style="display: none;">
-                <div class="section">
-                    <h2>📋 Aapke Expenses</h2>
-                    <div id="expenseList" class="expense-list"></div>
-                </div>
-            </div>
+            <button class="login-btn" onclick="login()">AUTHORIZE ACCESS</button>
+            <p id="error-msg">ACCESS_DENIED: Try Again</p>
         </div>
     </div>
 
-    <script>
-        let budgetData = {
-            salary: 0,
-            expenses: [],
-            remaining: 0
-        };
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard">
+        <header>
+            <div class="top-row">
+                <div class="logo">Amit Francis Xavier</div>
+                <button class="logout-btn" onclick="logout()">LOGOUT_SYSTEM</button>
+            </div>
+            <div class="controls">
+                <input type="text" id="search" class="search-box" placeholder="Search tools..." onkeyup="filterTools()">
+                <select id="filter" class="filter-select" onchange="filterTools()">
+                    <option value="all">ALL_CATEGORIES</option>
+                    <option value="ai">AI_STUDIO</option>
+                    <option value="system">SYSTEM_TOOLS</option>
+                </select>
+            </div>
+        </header>
 
-        function addExpense() {
-            const expenseInputs = document.getElementById('expenseInputs');
-            const newExpense = document.createElement('div');
-            newExpense.className = 'expense-item';
-            newExpense.innerHTML = `
-                <input type="text" placeholder="Expense name (eg: Rent)" class="expense-name">
-                <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
-                <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
-            `;
-            expenseInputs.appendChild(newExpense);
-        }
-
-        function removeExpense(button) {
-            const expenseItems = document.querySelectorAll('.expense-item');
-            if (expenseItems.length > 1) {
-                button.parentElement.remove();
-            } else {
-                alert('Kam se kam ek expense hona chahiye!');
-            }
-        }
-
-        function calculateBudget() {
-            const salary = parseFloat(document.getElementById('salary').value) || 0;
-            
-            if (salary <= 0) {
-                alert('Kripaya valid salary amount enter karein!');
-                return;
-            }
-
-            const expenseNames = document.querySelectorAll('.expense-name');
-            const expenseAmounts = document.querySelectorAll('.expense-amount');
-            
-            let totalExpenses = 0;
-            let expenses = [];
-
-            for (let i = 0; i < expenseNames.length; i++) {
-                const name = expenseNames[i].value.trim();
-                const amount = parseFloat(expenseAmounts[i].value) || 0;
+        <div class="container">
+            <div class="grid" id="tool-grid">
                 
-                if (name && amount > 0) {
-                    expenses.push({ name, amount });
-                    totalExpenses += amount;
+                <!-- Tool 1 -->
+                <div class="card" data-title="AI VOICE STUDIO" data-cat="ai">
+                    <h3>AI VOICE STUDIO</h3>
+                    <p>Neural bypass for voice cloning and advanced synthesis.</p>
+                    <a href="https://gemini.google.com/share/125cca867de3" target="_blank" class="cyber-btn">EXECUTE_VOICE</a>
+                </div>
+
+                <!-- Tool 2 -->
+                <div class="card" data-title="AI PORTRAIT STUDIO PRO" data-cat="ai">
+                    <h3>AI Portrait Studio Pro</h3>
+                    <p>Generative facial imaging and high-end portrait engine.</p>
+                    <a href="https://gemini.google.com/share/f014a15cdba6" target="_blank" class="cyber-btn">OPEN_STUDIO</a>
+                </div>
+
+                <!-- Tool 3 -->
+                <div class="card" data-title="FESTIVE AI STUDIO 2026" data-cat="ai">
+                    <h3>Festive AI Studio 2026</h3>
+                    <p>Celebration graphics and automated AI event tools.</p>
+                    <a href="https://gemini.google.com/share/d1a2691fb0d5" target="_blank" class="cyber-btn">INIT_FESTIVE</a>
+                </div>
+
+                <!-- Tool 4 -->
+                <div class="card" data-title="NETWORK SCANNER" data-cat="system">
+                    <h3>NETWORK SCANNER</h3>
+                    <p>Scan for active nodes and vulnerabilities in the grid.</p>
+                    <a href="#" class="cyber-btn">START_SCAN</a>
+                </div>
+
+                <!-- Tool 5 -->
+                <div class="card" data-title="DATABASE ENCRYPTOR" data-cat="system">
+                    <h3>DB ENCRYPTOR</h3>
+                    <p>Apply AES-256 encryption to sensitive vendor databases.</p>
+                    <a href="#" class="cyber-btn">SECURE_DATA</a>
+                </div>
+
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-name">Amit Francis Xavier</div>
+            <p style="font-size: 0.7rem; color: #444; margin-top: 10px;">CORE DEVELOPER | SECURE AI INTERFACE | 2025-2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- LOGIN LOGIC ---
+        function login() {
+            const u = document.getElementById('userid').value.trim();
+            const p = document.getElementById('password').value.trim();
+            
+            // Matches exactly: admin / amey aminehu@123
+            if (u === "admin" && p === "amey aminehu@123") {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                window.scrollTo(0,0);
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+                setTimeout(() => { document.getElementById('error-msg').style.display = 'none'; }, 2000);
+            }
+        }
+
+        // --- LOGOUT LOGIC ---
+        function logout() {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('userid').value = "";
+            document.getElementById('password').value = "";
+        }
+
+        // --- SEARCH & FILTER LOGIC ---
+        function filterTools() {
+            const searchVal = document.getElementById('search').value.toLowerCase();
+            const filterVal = document.getElementById('filter').value;
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                const cat = card.getAttribute('data-cat');
+                
+                const matchesSearch = title.includes(searchVal);
+                const matchesFilter = (filterVal === 'all' || cat === filterVal);
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
                 }
-            }
-
-            if (expenses.length === 0) {
-                alert('Kripaya kam se kam ek expense enter karein!');
-                return;
-            }
-
-            const remaining = salary - totalExpenses;
-
-            // Store data
-            budgetData = {
-                salary: salary,
-                expenses: expenses,
-                remaining: remaining
-            };
-
-            // Update UI
-            document.getElementById('totalSalary').textContent = `₹${salary.toLocaleString()}`;
-            document.getElementById('totalExpenses').textContent = `₹${totalExpenses.toLocaleString()}`;
-            document.getElementById('remainingAmount').textContent = `₹${remaining.toLocaleString()}`;
-
-            // Show summary
-            document.getElementById('summarySection').style.display = 'block';
-            document.getElementById('emailSection').style.display = 'block';
-            document.getElementById('expenseListSection').style.display = 'block';
-
-            // Update expense list
-            updateExpenseList();
-
-            // Scroll to summary
-            document.getElementById('summarySection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateExpenseList() {
-            const expenseList = document.getElementById('expenseList');
-            expenseList.innerHTML = '';
-
-            budgetData.expenses.forEach(expense => {
-                const item = document.createElement('div');
-                item.className = 'expense-list-item';
-                item.innerHTML = `
-                    <span><strong>${expense.name}</strong></span>
-                    <span>₹${expense.amount.toLocaleString()}</span>
-                `;
-                expenseList.appendChild(item);
             });
         }
 
-        function sendEmailNotification() {
-            const email = document.getElementById('email').value.trim();
-            
-            if (!email || !isValidEmail(email)) {
-                showNotification('Kripaya valid email address enter karein!', 'error');
-                return;
-            }
+        // --- MATRIX BACKGROUND ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
 
-            // Create email content
-            const subject = `Monthly Budget Report - ${new Date().toLocaleDateString('hi-IN')}`;
-            const body = `
-Namaste!
-
-Aapka monthly budget summary:
-
-💰 Total Salary: ₹${budgetData.salary.toLocaleString()}
-📉 Total Expenses: ₹${budgetData.expenses.reduce((sum, exp) => sum + exp.amount, 0).toLocaleString()}
-✅ Bacha Hua Amount: ₹${budgetData.remaining.toLocaleString()}
-
-📋 Expense Details:
-${budgetData.expenses.map(exp => `• ${exp.name}: ₹${exp.amount.toLocaleString()}`).join('\n')}
-
-💡 Sujhav:
-${budgetData.remaining > 0 ? `Aap ₹${budgetData.remaining.toLocaleString()} bacha paye hain. Isse savings ya investment mein use karein!` : 'Aapka budget balanced hai.'}
-
-Dhanyavaad,
-Budget Tracker System
-            `;
-
-            // Create mailto link
-            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
-            // Open email client
-            window.open(mailtoLink, '_blank');
-            
-            showNotification('Email notification taiyaar hai! Aapka email client khul jayega.', 'success');
-        }
-
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        function showNotification(message, type) {
-            const statusDiv = document.getElementById('emailStatus');
-            statusDiv.innerHTML = `<div class="notification ${type}">${message}</div>`;
-            
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 5000);
-        }
-
-        // Add some default expenses
-        window.onload = function() {
-            // Add common expense fields
-            const defaultExpenses = ['Rent', 'Food', 'Transport', 'Utilities'];
-            const expenseInputs = document.getElementById('expenseInputs');
-            expenseInputs.innerHTML = '';
-            
-            defaultExpenses.forEach(expense => {
-                const expenseItem = document.createElement('div');
-                expenseItem.className = 'expense-item';
-                expenseItem.innerHTML = `
-                    <input type="text" placeholder="Expense name" class="expense-name" value="${expense}">
-                    <input type="number" placeholder="Amount (₹)" class="expense-amount" min="0">
-                    <button class="btn btn-danger" onclick="removeExpense(this)">❌</button>
-                `;
-                expenseInputs.appendChild(expenseItem);
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ff41";
+            ctx.font = fontSize + "px monospace";
+            drops.forEach((y, i) => {
+                const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+                ctx.fillText(text, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
             });
-        };
+        }
+        setInterval(draw, 35);
     </script>
 </body>
 </html>
